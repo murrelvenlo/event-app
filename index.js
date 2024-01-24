@@ -25,6 +25,7 @@ mongoose.connect(uri, {
 })
 .then(() => {
   console.log('Connected to MongoDB');
+  mongoose.set('strictQuery', false);
 })
 .catch((error) => {
   console.error('Error connecting to MongoDB:', error);
