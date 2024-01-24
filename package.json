@@ -9,7 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "event-app"
+    "url": "https://github.com/murrelvenlo/event-app"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   },
   "author": "venlomj",
   "license": "ISC",
