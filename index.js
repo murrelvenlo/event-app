@@ -17,13 +17,23 @@ const port = process.env.PORT || 5000;
 const uri = process.env.MONGO_URI
 console.log("Mongo URI:", uri);
 
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, writeConcern: { w: "majority" }, useFindAndModify: false })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-  });
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useUnifiedTopology', true);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
+
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  writeConcern: { w: "majority" },
+})
+.then(() => {
+  console.log('Connected to MongoDB');
+})
+.catch((error) => {
+  console.error('Error connecting to MongoDB:', error);
+});
+
 
 const db = mongoose.connection;
 
