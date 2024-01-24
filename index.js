@@ -17,10 +17,6 @@ const port = process.env.PORT || 5000;
 const uri = process.env.MONGO_URI
 console.log("Mongo URI:", uri);
 
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useUnifiedTopology', true);
-mongoose.set('useCreateIndex', true);
-mongoose.set('useFindAndModify', false);
 
 mongoose.connect(uri, {
   useNewUrlParser: true,
