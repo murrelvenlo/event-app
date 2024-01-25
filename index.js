@@ -163,12 +163,12 @@ const MeetingSchema = {
 };
 
 // GET endpoint to retrieve all meetings
-app.get('/meetings', (req, res) => {
+app.get('/api/meetings', (req, res) => {
   res.json(meetings);
 });
 
 // GET endpoint to retrieve a meeting by its id
-app.get('/meetings/:id', (req, res) => {
+app.get('/api/meetings/:id', (req, res) => {
   const id = req.params.id;
   const meeting = meetings.find(m => m.id === id);
   if (!meeting) {
@@ -178,14 +178,14 @@ app.get('/meetings/:id', (req, res) => {
 });
 
 // POST endpoint to create a new meeting
-app.post('/meetings', (req, res) => {
+app.post('/api/meetings', (req, res) => {
   const newMeeting = { ...MeetingSchema, ...req.body, id: uuidv4() };
   meetings.push(newMeeting);
   res.status(201).json(newMeeting);
 });
 
 // PUT endpoint to update a meeting by its id
-app.put('/meetings/:id', (req, res) => {
+app.put('/api/meetings/:id', (req, res) => {
   const id = req.params.id;
   const updatedMeeting = req.body;
   const index = meetings.findIndex(m => m.id === id);
@@ -197,7 +197,7 @@ app.put('/meetings/:id', (req, res) => {
 });
 
 // DELETE endpoint to delete a meeting by its id
-app.delete('/meetings/:id', (req, res) => {
+app.delete('/api/meetings/:id', (req, res) => {
   const id = req.params.id;
   const index = meetings.findIndex(m => m.id === id);
   if (index === -1) {
