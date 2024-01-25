@@ -121,90 +121,98 @@ app.post('/api/events', async (req, res) => {
     }
   });
 
-  // Sample data
-let meetings = [
-  {
-    id: '1',
-    name: "Meeting 1",
-    meetings: [
-      {
-        fullName: "John Doe",
-        name: "Meeting Room 1",
-        startTime: "2024-01-18T20:29:47.204Z",
-        endTime: "2024-01-18T21:29:47.204Z"
-      }
-    ]
-  },
-  {
-    id: '2',
-    name: "Meeting 2",
-    meetings: [
-      {
-        fullName: "Jane Smith",
-        name: "Meeting Room 2",
-        startTime: "2024-01-19T10:00:00.000Z",
-        endTime: "2024-01-19T11:00:00.000Z"
-      },
-      {
-        fullName: "Alice Johnson",
-        name: "Meeting Room 3",
-        startTime: "2024-01-20T15:00:00.000Z",
-        endTime: "2024-01-20T16:00:00.000Z"
-      }
-    ]
-  }
-];
 
-// Schema for meetings
-const MeetingSchema = {
-  id: '',
-  name: '',
-  meetings: []
-};
-
-// GET endpoint to retrieve all meetings
-app.get('/api/meetings', (req, res) => {
-  res.json(meetings);
+// Meeting Schema
+const meetingSchema = new mongoose.Schema({
+  name: String,
+  meetings: [{ 
+    fullName: String,
+    name: String,
+    startTime: Date,
+    endTime: Date
+  }]
 });
 
-// GET endpoint to retrieve a meeting by its id
-app.get('/api/meetings/:id', (req, res) => {
-  const id = req.params.id;
-  const meeting = meetings.find(m => m.id === id);
-  if (!meeting) {
-    return res.status(404).json({ message: 'Meeting not found' });
+const Meeting = mongoose.model('Meeting', meetingSchema);
+
+// Read All Meetings
+app.get('/api/meetings', async (req, res) => {
+  try {
+    const meetings = await Meeting.find();
+    const formattedMeetings = meetings.map(meeting => {
+      return {
+        id: meeting._id, // Use _id as id
+        name: meeting.name,
+        meetings: meeting.meetings.map(subMeeting => {
+          return {
+            fullName: subMeeting.fullName,
+            name: subMeeting.name,
+            startTime: subMeeting.startTime,
+            endTime: subMeeting.endTime
+          };
+        })
+      };
+    });
+    res.json(formattedMeetings);
+  } catch (error) {
+    console.error('Error fetching meetings:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-  res.json(meeting);
 });
 
-// POST endpoint to create a new meeting
-app.post('/api/meetings', (req, res) => {
-  const newMeeting = { ...MeetingSchema, ...req.body, id: uuidv4() };
-  meetings.push(newMeeting);
-  res.status(201).json(newMeeting);
+
+// Read Single Meeting
+app.get('/api/meetings/:id', async (req, res) => {
+  try {
+    const meeting = await Meeting.findById(req.params.id);
+    if (!meeting) {
+      return res.status(404).json({ error: 'Meeting not found' });
+    }
+    res.json(meeting);
+  } catch (error) {
+    console.error('Error fetching meeting:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
-// PUT endpoint to update a meeting by its id
-app.put('/api/meetings/:id', (req, res) => {
-  const id = req.params.id;
-  const updatedMeeting = req.body;
-  const index = meetings.findIndex(m => m.id === id);
-  if (index === -1) {
-    return res.status(404).json({ message: 'Meeting not found' });
+// Create Meeting
+app.post('/api/meetings', async (req, res) => {
+  try {
+    const newMeeting = new Meeting(req.body);
+    const savedMeeting = await newMeeting.save();
+    res.status(201).json(savedMeeting);
+  } catch (error) {
+    console.error('Error creating meeting:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-  meetings[index] = { ...meetings[index], ...updatedMeeting };
-  res.json(meetings[index]);
 });
 
-// DELETE endpoint to delete a meeting by its id
-app.delete('/api/meetings/:id', (req, res) => {
-  const id = req.params.id;
-  const index = meetings.findIndex(m => m.id === id);
-  if (index === -1) {
-    return res.status(404).json({ message: 'Meeting not found' });
+// Update Meeting
+app.put('/api/meetings/:id', async (req, res) => {
+  try {
+    const updatedMeeting = await Meeting.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedMeeting) {
+      return res.status(404).json({ error: 'Meeting not found' });
+    }
+    res.json(updatedMeeting);
+  } catch (error) {
+    console.error('Error updating meeting:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-  meetings.splice(index, 1);
-  res.sendStatus(204);
+});
+
+// Delete Meeting
+app.delete('/api/meetings/:id', async (req, res) => {
+  try {
+    const deletedMeeting = await Meeting.findByIdAndDelete(req.params.id);
+    if (!deletedMeeting) {
+      return res.status(404).json({ error: 'Meeting not found' });
+    }
+    res.json(deletedMeeting);
+  } catch (error) {
+    console.error('Error deleting meeting:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
   
 
