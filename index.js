@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { json, urlencoded } = require('body-parser');
 const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 
@@ -119,6 +120,92 @@ app.post('/api/events', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+  // Sample data
+let meetings = [
+  {
+    id: '1',
+    name: "Meeting 1",
+    meetings: [
+      {
+        fullName: "John Doe",
+        name: "Meeting Room 1",
+        startTime: "2024-01-18T20:29:47.204Z",
+        endTime: "2024-01-18T21:29:47.204Z"
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: "Meeting 2",
+    meetings: [
+      {
+        fullName: "Jane Smith",
+        name: "Meeting Room 2",
+        startTime: "2024-01-19T10:00:00.000Z",
+        endTime: "2024-01-19T11:00:00.000Z"
+      },
+      {
+        fullName: "Alice Johnson",
+        name: "Meeting Room 3",
+        startTime: "2024-01-20T15:00:00.000Z",
+        endTime: "2024-01-20T16:00:00.000Z"
+      }
+    ]
+  }
+];
+
+// Schema for meetings
+const MeetingSchema = {
+  id: '',
+  name: '',
+  meetings: []
+};
+
+// GET endpoint to retrieve all meetings
+app.get('/meetings', (req, res) => {
+  res.json(meetings);
+});
+
+// GET endpoint to retrieve a meeting by its id
+app.get('/meetings/:id', (req, res) => {
+  const id = req.params.id;
+  const meeting = meetings.find(m => m.id === id);
+  if (!meeting) {
+    return res.status(404).json({ message: 'Meeting not found' });
+  }
+  res.json(meeting);
+});
+
+// POST endpoint to create a new meeting
+app.post('/meetings', (req, res) => {
+  const newMeeting = { ...MeetingSchema, ...req.body, id: uuidv4() };
+  meetings.push(newMeeting);
+  res.status(201).json(newMeeting);
+});
+
+// PUT endpoint to update a meeting by its id
+app.put('/meetings/:id', (req, res) => {
+  const id = req.params.id;
+  const updatedMeeting = req.body;
+  const index = meetings.findIndex(m => m.id === id);
+  if (index === -1) {
+    return res.status(404).json({ message: 'Meeting not found' });
+  }
+  meetings[index] = { ...meetings[index], ...updatedMeeting };
+  res.json(meetings[index]);
+});
+
+// DELETE endpoint to delete a meeting by its id
+app.delete('/meetings/:id', (req, res) => {
+  const id = req.params.id;
+  const index = meetings.findIndex(m => m.id === id);
+  if (index === -1) {
+    return res.status(404).json({ message: 'Meeting not found' });
+  }
+  meetings.splice(index, 1);
+  res.sendStatus(204);
+});
   
 
 // Start server
